@@ -1,0 +1,23 @@
+@model Smart_retail_manager_website.Models.ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="container text-center mt-5">
+    <h1 class="display-5 text-danger fw-bold">Oops! Something went wrong.</h1>
+
+    <p class="lead mt-3 text-light">
+        @Model.ErrorMessage
+    </p>
+
+    @if (Model.ShowRequestId)
+    {
+    <p class="text-secondary">
+        <small>Request ID: <code>@Model.RequestId</code></small>
+    </p>
+    }
+
+    <a class="btn btn-primary mt-4" asp-controller="Home" asp-action="Index">
+        Back to Home
+    </a>
+</div>

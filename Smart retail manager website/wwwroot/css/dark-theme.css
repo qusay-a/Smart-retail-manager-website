@@ -1,0 +1,67 @@
+/* Dark Mode Custom Theme */
+body {
+    background-color: #0b0e12;
+    color: #e6e6e6;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+a {
+    color: #67aaff;
+}
+
+    a:hover {
+        color: #339cff;
+    }
+
+/* Buttons */
+.btn-primary {
+    background-color: #003E80;
+    border-color: #003E80;
+}
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #004b9b;
+    }
+
+/* Tables */
+.table {
+    color: #e6e6e6;
+    background-color: #121417;
+}
+
+    .table th, .table td {
+        border-color: #1f2329;
+    }
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 62, 128, 0.2);
+}
+
+/* Forms */
+.form-control, .form-select {
+    background-color: #1a1d21;
+    border-color: #2b3036;
+    color: #e6e6e6;
+}
+
+    .form-control:focus, .form-select:focus {
+        border-color: #003E80;
+        box-shadow: 0 0 0 0.25rem rgba(0, 62, 128, 0.25);
+    }
+
+/* Navbar */
+.navbar-dark .navbar-nav .nav-link {
+    color: #ddd;
+}
+
+    .navbar-dark .navbar-nav .nav-link.active,
+    .navbar-dark .navbar-nav .nav-link:hover {
+        color: #67aaff;
+    }
+
+/* Footer */
+footer {
+    background-color: #0d1117;
+    border-top: 1px solid #1f2329;
+}

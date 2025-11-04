@@ -1,0 +1,62 @@
+﻿@model Smart_retail_manager_website.Models.Customer
+@{
+    ViewData["Title"] = "Add Customer";
+    Layout = "_Layout";
+}
+
+<h2>Add New Customer</h2>
+
+<form asp-action="Bills" asp-controller="Home" method="post" id="customerForm">
+    <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input asp-for="Name" class="form-control" required />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Phone</label>
+        <input asp-for="Phone" class="form-control" required />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input asp-for="Email" class="form-control" required />
+    </div>
+
+    <h4>Select Products and Quantities</h4>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Select</th>
+                <th>Product</th>
+                <th>Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><input type="checkbox" name="selectedProducts" value="1" /></td>
+                <td>Laptop</td>
+                <td><input type="number" name="quantities[1]" min="1" value="1" class="form-control" /></td>
+            </tr>
+            <tr>
+                <td><input type="checkbox" name="selectedProducts" value="2" /></td>
+                <td>Notebook</td>
+                <td><input type="number" name="quantities[2]" min="1" value="1" class="form-control" /></td>
+            </tr>
+            <tr>
+                <td><input type="checkbox" name="selectedProducts" value="3" /></td>
+                <td>Milk</td>
+                <td><input type="number" name="quantities[3]" min="1" value="1" class="form-control" /></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-success mt-3">Create Bill</button>
+</form>
+
+<script>
+    document.getElementById("customerForm").addEventListener("submit", function (e) {
+        const checked = document.querySelectorAll("input[name='selectedProducts']:checked");
+        if (checked.length === 0) {
+            alert("Please select at least one product.");
+            e.preventDefault();
+        }
+    });
+</script>

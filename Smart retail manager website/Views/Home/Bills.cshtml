@@ -1,0 +1,29 @@
+﻿@model List<Smart_retail_manager_website.Models.Bill>
+
+<h2>All Bills</h2>
+
+@if (Model == null || Model.Count == 0)
+{
+    <p>No bills found.</p>
+}
+else
+{
+    <table class="table">
+        <tr>
+            <th>Bill ID</th>
+            <th>Customer Name</th>
+            <th>Total</th>
+            <th>Date</th>
+        </tr>
+
+        @foreach (var bill in Model)
+        {
+            <tr>
+                <td>@bill.BillID</td>
+                <td>@bill.Customer.Name</td>
+                <td>@bill.CalculateTotal()</td>
+                <td>@bill.Date</td>
+            </tr>
+        }
+    </table>
+}

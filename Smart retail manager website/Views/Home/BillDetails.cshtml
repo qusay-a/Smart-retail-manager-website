@@ -1,0 +1,32 @@
+﻿@model Smart_retail_manager_website.Models.Bill
+@{
+    ViewData["Title"] = "Bill details";
+}
+<h2>Bill Summary</h2>
+
+<p><strong>Bill ID:</strong> @Model.BillID</p>
+<p><strong>Date:</strong> @Model.Date</p>
+<p><strong>Customer:</strong> @Model.Customer.Name</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.UnitPrice</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p><strong>Subtotal:</strong> @Model.CalcSubTotal()</p>
+<p><strong>Total (with tax):</strong> @Model.CalculateTotal()</p>
+
+<a asp-controller="Home" asp-action="Summary" class="btn btn-primary">View All Bills</a>
