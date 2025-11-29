@@ -1,0 +1,25 @@
+@model Smart_retail_manager_website.Pages.SummaryModel
+
+<h2>Bill Summary</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Bill ID</th>
+            <th>Customer</th>
+            <th>Date</th>
+            <th>Total Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var bill in Model.Bills)
+    {
+        <tr>
+            <td>@bill.BillID</td>
+            <td>@bill.Cname</td>
+            <td>@bill.DateOfInvoice.ToShortDateString()</td>
+            <td>@bill.LineTotal</td>
+        </tr>
+    }
+    </tbody>
+</table>

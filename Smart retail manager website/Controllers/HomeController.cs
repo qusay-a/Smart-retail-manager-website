@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Smart_retail_manager_website.Data;
 using Smart_retail_manager_website.Models;
+using Smart_retail_manager_website.Views.Home;
 using System.Diagnostics;
 using System.Text.Json;
 
@@ -9,14 +11,18 @@ namespace Smart_retail_manager_website.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly BillRepository _billRepository;
+
         private static int nextCustomerId = 1;
         private static int nextBillId = 1;
 
         private static List<Product> allProducts = ProductsController.AllProducts;
 
-        public HomeController(ILogger<HomeController> logger)
+        
+        public HomeController(ILogger<HomeController> logger, BillRepository billRepository)
         {
             _logger = logger;
+            _billRepository = billRepository;
         }
 
         public IActionResult Index() => View();
@@ -46,12 +52,12 @@ namespace Smart_retail_manager_website.Controllers
         {
             try
             {
-                
                 if (!ModelState.IsValid)
                 {
                     return View("AddCustomers", customer);
                 }
-if (selectedProducts == null || selectedProducts.Count == 0)
+
+                if (selectedProducts == null || selectedProducts.Count == 0)
                 {
                     TempData["Error"] = "You must select at least one product.";
                     return RedirectToAction("AddCustomers");
@@ -74,9 +80,9 @@ if (selectedProducts == null || selectedProducts.Count == 0)
                             continue;
 
                         for (int i = 0; i < qty; i++)
-                            bill.AddProduct(new Product(product.ProductID, product.Name, product.Category, product.UnitPrice, product.QuantityInStock));
+                            bill.AddProduct(new Product(product.ProductID, product.Name,
+                                product.Category, product.UnitPrice, product.QuantityInStock));
 
-                        // Decrease stock count
                         product.QuantityInStock -= qty;
                     }
                 }
@@ -102,21 +108,18 @@ if (selectedProducts == null || selectedProducts.Count == 0)
             }
         }
 
-        public IActionResult Summary()
-        {
-            try
-            {
-                var bills = GetBillsFromSession();
-                return View(bills);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error while loading summary.");
-                TempData["Error"] = "Could not load summary data.";
-                return RedirectToAction("Error");
-            }
-        }
 
+        public async Task<IActionResult> Summary()
+        {
+            var list = await _billRepository.GetBillSummaryAsync();
+
+            var model = new SummaryModel
+            {
+                Bills = list
+            };
+
+            return View(model);
+        }
         private List<Bill> GetBillsFromSession()
         {
             var data = HttpContext.Session.GetString("Bills");
@@ -131,7 +134,6 @@ if (selectedProducts == null || selectedProducts.Count == 0)
             HttpContext.Session.SetString("Bills", json);
         }
 
-        // 🧪 Test action to trigger an error manually
         public IActionResult ForceError()
         {
             try
@@ -150,7 +152,9 @@ if (selectedProducts == null || selectedProducts.Count == 0)
         public IActionResult Error()
         {
             var exceptionFeature = HttpContext.Features.Get<IExceptionHandlerFeature>();
-            var errorMessage = exceptionFeature?.Error.Message ?? TempData["Error"]?.ToString() ?? "An unexpected error occurred.";
+            var errorMessage = exceptionFeature?.Error.Message
+                               ?? TempData["Error"]?.ToString()
+                               ?? "An unexpected error occurred.";
 
             var model = new ErrorViewModel
             {
