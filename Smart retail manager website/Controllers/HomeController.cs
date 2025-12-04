@@ -16,9 +16,10 @@ namespace Smart_retail_manager_website.Controllers
         private static int nextCustomerId = 1;
         private static int nextBillId = 1;
 
-        private static List<Product> allProducts = ProductsController.AllProducts;
+        private readonly List<Product> allProducts = ProductsController.AllProducts;
 
-        
+        public double TaxRate { get; private set; }
+
         public HomeController(ILogger<HomeController> logger, BillRepository billRepository)
         {
             _logger = logger;
@@ -32,12 +33,26 @@ namespace Smart_retail_manager_website.Controllers
         public IActionResult AddCustomers() => View();
 
         [HttpGet]
-        public IActionResult Bills()
+        public async Task<IActionResult> Bills(int? id)
         {
             try
             {
-                var bills = GetBillsFromSession();
-                return View(bills);
+                if (!id.HasValue)
+                {
+                    TempData["Error"] = "Invalid bill ID.";
+                    return RedirectToAction("Summary");
+                }
+
+                var dbBill = await _billRepository.GetBillDetailsAsync(id.Value);
+
+                // Add this null check here too
+                if (dbBill == null)
+                {
+                    TempData["Error"] = "Bill not found.";
+                    return RedirectToAction("Summary");
+                }
+
+                return View("BillDetails", dbBill);
             }
             catch (Exception ex)
             {
@@ -48,66 +63,65 @@ namespace Smart_retail_manager_website.Controllers
         }
 
         [HttpPost]
-        public IActionResult Bills(Customer customer, List<int> selectedProducts, Dictionary<int, int> quantities)
+        public async Task<IActionResult> Bills(
+    Customer customer,
+    List<int> selectedProducts,
+    List<int> productIds,
+    List<int> quantities)
         {
+            if (!ModelState.IsValid)
+                return View("AddCustomers", customer);
+
+            if (selectedProducts == null || selectedProducts.Count == 0)
+            {
+                TempData["Error"] = "You must select at least one product.";
+                return View("AddCustomers", customer);
+            }
+
+            if (productIds == null || quantities == null || productIds.Count != quantities.Count)
+            {
+                TempData["Error"] = "Invalid product selection.";
+                return View("AddCustomers", customer);
+            }
+
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    return View("AddCustomers", customer);
-                }
+                int customerId = await _billRepository.InsertCustomerAsync(customer);
+                int billId = await _billRepository.InsertBillAsync(customerId, DateTime.Now, TaxRate);
 
-                if (selectedProducts == null || selectedProducts.Count == 0)
+                for (int i = 0; i < productIds.Count; i++)
                 {
-                    TempData["Error"] = "You must select at least one product.";
-                    return RedirectToAction("AddCustomers");
-                }
+                    int pid = productIds[i];
+                    if (!selectedProducts.Contains(pid)) continue;
 
-                customer.CustomerID = nextCustomerId++;
-                var bill = new Bill(nextBillId++, customer);
-
-                foreach (var pid in selectedProducts)
-                {
                     var product = allProducts.FirstOrDefault(p => p.ProductID == pid);
-                    if (product != null)
-                    {
-                        int qty = quantities.ContainsKey(pid) ? quantities[pid] : 1;
+                    if (product == null) continue;
 
-                        if (qty > product.QuantityInStock)
-                            qty = product.QuantityInStock;
+                    int qty = Math.Min(quantities[i], product.QuantityInStock);
+                    if (qty <= 0) continue;
 
-                        if (qty <= 0)
-                            continue;
+                    await _billRepository.InsertBillItemAsync(billId, product.ProductID, product.UnitPrice, qty);
 
-                        for (int i = 0; i < qty; i++)
-                            bill.AddProduct(new Product(product.ProductID, product.Name,
-                                product.Category, product.UnitPrice, product.QuantityInStock));
-
-                        product.QuantityInStock -= qty;
-                    }
+                    // reduce stock
+                    product.QuantityInStock -= qty;
                 }
 
-                var existingBills = GetBillsFromSession();
-                existingBills.Add(bill);
-                SaveBillsToSession(existingBills);
+                var dbBill = await _billRepository.GetBillDetailsAsync(billId);
+                if (dbBill == null)
+                {
+                    TempData["Error"] = "Bill not found after creation.";
+                    return RedirectToAction("Summary");
+                }
 
-                TempData["SuccessMessage"] = "Bill created successfully!";
-                return View("BillDetails", bill);
-            }
-            catch (ArgumentException ex)
-            {
-                _logger.LogWarning(ex, "Invalid input while creating bill.");
-                ViewBag.ErrorMessage = ex.Message;
-                return View("AddCustomers", customer);
+                return View("BillDetails", dbBill);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error while creating bill.");
-                TempData["Error"] = "An error occurred while creating the bill. Please try again.";
+                _logger.LogError(ex, "Error creating bill");
+                TempData["Error"] = $"An error occurred while creating the bill: {ex.Message}";
                 return RedirectToAction("Error");
             }
         }
-
 
         public async Task<IActionResult> Summary()
         {

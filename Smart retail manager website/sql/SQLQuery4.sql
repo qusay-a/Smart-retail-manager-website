@@ -1,235 +1,63 @@
-USE [master]
-GO
-/****** Object:  Database [RetailDB]    Script Date: 11/29/2025 11:21:16 AM ******/
-CREATE DATABASE [RetailDB]
- CONTAINMENT = NONE
- ON  PRIMARY 
-( NAME = N'RetailDB', FILENAME = N'C:\Users\qusay\RetailDB.mdf' , SIZE = 8192KB , MAXSIZE = UNLIMITED, FILEGROWTH = 65536KB )
- LOG ON 
-( NAME = N'RetailDB_log', FILENAME = N'C:\Users\qusay\RetailDB_log.ldf' , SIZE = 8192KB , MAXSIZE = 2048GB , FILEGROWTH = 65536KB )
- WITH CATALOG_COLLATION = DATABASE_DEFAULT
-GO
-ALTER DATABASE [RetailDB] SET COMPATIBILITY_LEVEL = 150
-GO
-IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
-begin
-EXEC [RetailDB].[dbo].[sp_fulltext_database] @action = 'enable'
-end
-GO
-ALTER DATABASE [RetailDB] SET ANSI_NULL_DEFAULT OFF 
-GO
-ALTER DATABASE [RetailDB] SET ANSI_NULLS OFF 
-GO
-ALTER DATABASE [RetailDB] SET ANSI_PADDING OFF 
-GO
-ALTER DATABASE [RetailDB] SET ANSI_WARNINGS OFF 
-GO
-ALTER DATABASE [RetailDB] SET ARITHABORT OFF 
-GO
-ALTER DATABASE [RetailDB] SET AUTO_CLOSE OFF 
-GO
-ALTER DATABASE [RetailDB] SET AUTO_SHRINK OFF 
-GO
-ALTER DATABASE [RetailDB] SET AUTO_UPDATE_STATISTICS ON 
-GO
-ALTER DATABASE [RetailDB] SET CURSOR_CLOSE_ON_COMMIT OFF 
-GO
-ALTER DATABASE [RetailDB] SET CURSOR_DEFAULT  GLOBAL 
-GO
-ALTER DATABASE [RetailDB] SET CONCAT_NULL_YIELDS_NULL OFF 
-GO
-ALTER DATABASE [RetailDB] SET NUMERIC_ROUNDABORT OFF 
-GO
-ALTER DATABASE [RetailDB] SET QUOTED_IDENTIFIER OFF 
-GO
-ALTER DATABASE [RetailDB] SET RECURSIVE_TRIGGERS OFF 
-GO
-ALTER DATABASE [RetailDB] SET  DISABLE_BROKER 
-GO
-ALTER DATABASE [RetailDB] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
-GO
-ALTER DATABASE [RetailDB] SET DATE_CORRELATION_OPTIMIZATION OFF 
-GO
-ALTER DATABASE [RetailDB] SET TRUSTWORTHY OFF 
-GO
-ALTER DATABASE [RetailDB] SET ALLOW_SNAPSHOT_ISOLATION OFF 
-GO
-ALTER DATABASE [RetailDB] SET PARAMETERIZATION SIMPLE 
-GO
-ALTER DATABASE [RetailDB] SET READ_COMMITTED_SNAPSHOT OFF 
-GO
-ALTER DATABASE [RetailDB] SET HONOR_BROKER_PRIORITY OFF 
-GO
-ALTER DATABASE [RetailDB] SET RECOVERY SIMPLE 
-GO
-ALTER DATABASE [RetailDB] SET  MULTI_USER 
-GO
-ALTER DATABASE [RetailDB] SET PAGE_VERIFY CHECKSUM  
-GO
-ALTER DATABASE [RetailDB] SET DB_CHAINING OFF 
-GO
-ALTER DATABASE [RetailDB] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
-GO
-ALTER DATABASE [RetailDB] SET TARGET_RECOVERY_TIME = 60 SECONDS 
-GO
-ALTER DATABASE [RetailDB] SET DELAYED_DURABILITY = DISABLED 
-GO
-ALTER DATABASE [RetailDB] SET ACCELERATED_DATABASE_RECOVERY = OFF  
-GO
-ALTER DATABASE [RetailDB] SET QUERY_STORE = OFF
-GO
-USE [RetailDB]
-GO
-/****** Object:  Table [dbo].[Products]    Script Date: 11/29/2025 11:21:16 AM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Products](
-	[ProductID] [int] NOT NULL,
-	[Pname] [nvarchar](200) NOT NULL,
-	[Category] [nvarchar](200) NOT NULL,
-	[UnitPrice] [decimal](10, 2) NOT NULL,
-	[QuantityInStock] [int] NOT NULL,
- CONSTRAINT [PK_Products] PRIMARY KEY CLUSTERED 
-(
-	[ProductID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[Bill]    Script Date: 11/29/2025 11:21:16 AM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Bill](
-	[BillID] [int] NOT NULL,
-	[DateOfInvoice] [datetime] NOT NULL,
-	[CustomerID] [int] NOT NULL,
-	[TaxRate] [decimal](3, 2) NOT NULL,
- CONSTRAINT [PK_Bill] PRIMARY KEY CLUSTERED 
-(
-	[BillID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[Customer]    Script Date: 11/29/2025 11:21:16 AM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Customer](
-	[CustomerID] [int] NOT NULL,
-	[Cname] [nvarchar](200) NOT NULL,
-	[Phone] [nvarchar](12) NULL,
-	[Email] [nvarchar](200) NULL,
- CONSTRAINT [PK_Customer] PRIMARY KEY CLUSTERED 
-(
-	[CustomerID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[BillItem]    Script Date: 11/29/2025 11:21:16 AM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[BillItem](
-	[BillItemID] [int] NOT NULL,
-	[BillID] [int] NOT NULL,
-	[ProductID] [int] NOT NULL,
-	[Quantity] [int] NOT NULL,
-	[UnitPrice] [decimal](10, 2) NOT NULL,
- CONSTRAINT [PK_BillItem] PRIMARY KEY CLUSTERED 
-(
-	[BillItemID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  View [dbo].[vw_billSummary]    Script Date: 11/29/2025 11:21:16 AM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[vw_billSummary]
-AS
-SELECT
-	B.BillID,
-	B.DateOfInvoice,
-	C.Cname,
-	P.Pname,
-	I.Quantity,
-	I.UnitPrice,
-	(I.Quantity*I.UnitPrice) AS LineTotal
-FROM Bill AS B
-JOIN Customer AS C ON B.CustomerID = C.CustomerID
-JOIN BillItem AS I ON B.BillID = I.BillID
-JOIN Products AS P ON I.ProductID = P.ProductID;
+CREATE TABLE [dbo].[Bill] (
+    [BillID]     INT            IDENTITY (1, 1) NOT NULL,
+    [Date]       DATETIME       NOT NULL,
+    [CustomerID] INT            NOT NULL,
+    [TaxRate]    DECIMAL (5, 4) NOT NULL,
+    PRIMARY KEY CLUSTERED ([BillID] ASC),
+    CONSTRAINT [FK_Bill_Customer] FOREIGN KEY ([CustomerID]) REFERENCES [dbo].[Customer] ([CustomerID])
+);
 
-GO
-/****** Object:  Table [dbo].[Users]    Script Date: 11/29/2025 11:21:16 AM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Users](
-	[Username] [nvarchar](200) NOT NULL,
-	[Pass] [nvarchar](255) NOT NULL,
-	[Email] [nvarchar](200) NOT NULL,
-	[phoneNum] [nvarchar](12) NULL,
-	[Role] [nvarchar](50) NULL,
- CONSTRAINT [PK_Users] PRIMARY KEY CLUSTERED 
-(
-	[Username] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[Bill] ADD  CONSTRAINT [DF_Bill_DateOfInvoice_Today]  DEFAULT (getdate()) FOR [DateOfInvoice]
-GO
-ALTER TABLE [dbo].[Bill] ADD  CONSTRAINT [DF_Bill_TaxRate_Default]  DEFAULT ((0.05)) FOR [TaxRate]
-GO
-ALTER TABLE [dbo].[BillItem] ADD  CONSTRAINT [DF_BillItem_Quantity_Default]  DEFAULT ((1)) FOR [Quantity]
-GO
-ALTER TABLE [dbo].[Products] ADD  CONSTRAINT [DF_Products_QuantityInStock_Zero]  DEFAULT ((0)) FOR [QuantityInStock]
-GO
-ALTER TABLE [dbo].[Bill]  WITH CHECK ADD  CONSTRAINT [FK_Bill_Customer] FOREIGN KEY([CustomerID])
-REFERENCES [dbo].[Customer] ([CustomerID])
-GO
-ALTER TABLE [dbo].[Bill] CHECK CONSTRAINT [FK_Bill_Customer]
-GO
-ALTER TABLE [dbo].[BillItem]  WITH CHECK ADD  CONSTRAINT [FK_Bill_Products] FOREIGN KEY([ProductID])
-REFERENCES [dbo].[Products] ([ProductID])
-GO
-ALTER TABLE [dbo].[BillItem] CHECK CONSTRAINT [FK_Bill_Products]
-GO
-ALTER TABLE [dbo].[BillItem]  WITH CHECK ADD  CONSTRAINT [FK_BillItem_Bill] FOREIGN KEY([BillID])
-REFERENCES [dbo].[Bill] ([BillID])
-GO
-ALTER TABLE [dbo].[BillItem] CHECK CONSTRAINT [FK_BillItem_Bill]
-GO
-ALTER TABLE [dbo].[Bill]  WITH CHECK ADD CHECK  (([TaxRate]>=(0.01) AND [TaxRate]<=(1.00)))
-GO
-ALTER TABLE [dbo].[Bill]  WITH CHECK ADD  CONSTRAINT [CK_Bill_TaxRate_Valid] CHECK  (([TaxRate]>=(0.00) AND [TaxRate]<=(1.00)))
-GO
-ALTER TABLE [dbo].[Bill] CHECK CONSTRAINT [CK_Bill_TaxRate_Valid]
-GO
-ALTER TABLE [dbo].[BillItem]  WITH CHECK ADD  CONSTRAINT [CK_BillItem_Quantity_Positive] CHECK  (([Quantity]>(0)))
-GO
-ALTER TABLE [dbo].[BillItem] CHECK CONSTRAINT [CK_BillItem_Quantity_Positive]
-GO
-ALTER TABLE [dbo].[BillItem]  WITH CHECK ADD  CONSTRAINT [CK_BillItem_UnitPrice_Positive] CHECK  (([UnitPrice]>(0)))
-GO
-ALTER TABLE [dbo].[BillItem] CHECK CONSTRAINT [CK_BillItem_UnitPrice_Positive]
-GO
-ALTER TABLE [dbo].[Products]  WITH CHECK ADD  CONSTRAINT [CK_Products_Quantity_NonNegative] CHECK  (([QuantityInStock]>=(0)))
-GO
-ALTER TABLE [dbo].[Products] CHECK CONSTRAINT [CK_Products_Quantity_NonNegative]
-GO
-ALTER TABLE [dbo].[Products]  WITH CHECK ADD  CONSTRAINT [CK_Products_UnitPrice_Positive] CHECK  (([UnitPrice]>(0)))
-GO
-ALTER TABLE [dbo].[Products] CHECK CONSTRAINT [CK_Products_UnitPrice_Positive]
-GO
-USE [master]
-GO
-ALTER DATABASE [RetailDB] SET  READ_WRITE 
-GO
+CREATE TABLE [dbo].[Bill_Products] (
+    [BillID]    INT        NOT NULL,
+    [ProductID] INT        NOT NULL,
+    [Price]     FLOAT (53) NOT NULL,
+    CONSTRAINT [PK_Bill_Products] PRIMARY KEY CLUSTERED ([BillID] ASC, [ProductID] ASC),
+    CONSTRAINT [FK_Bill_Products_Bill] FOREIGN KEY ([BillID]) REFERENCES [dbo].[Bill] ([BillID]),
+    CONSTRAINT [FK_Bill_Products_Product] FOREIGN KEY ([ProductID]) REFERENCES [dbo].[Product] ([ProductID])
+);
+
+CREATE TABLE [dbo].[BillSummaryRow] (
+    [RowID]         INT             IDENTITY (1, 1) NOT NULL,
+    [BillID]        INT             NOT NULL,
+    [Cname]         VARCHAR (50)    NOT NULL,
+    [DateOfInvoice] DATETIME        NOT NULL,
+    [LineTotal]     DECIMAL (18, 2) NOT NULL,
+    PRIMARY KEY CLUSTERED ([RowID] ASC)
+);
+
+CREATE TABLE [dbo].[Customer] (
+    [CustomerID] INT           IDENTITY (1, 1) NOT NULL,
+    [Name]       VARCHAR (50)  NOT NULL,
+    [Phone]      VARCHAR (20)  NOT NULL,
+    [Email]      VARCHAR (100) NOT NULL,
+    PRIMARY KEY CLUSTERED ([CustomerID] ASC)
+);
+
+CREATE TABLE [dbo].[Product] (
+    [ProductID]       INT             IDENTITY (1, 1) NOT NULL,
+    [Name]            VARCHAR (100)   NOT NULL,
+    [Category]        INT             NOT NULL,
+    [UnitPrice]       DECIMAL (18, 2) NOT NULL,
+    [QuantityInStock] INT             NOT NULL,
+    PRIMARY KEY CLUSTERED ([ProductID] ASC),
+    CONSTRAINT [FK_Product_Category] FOREIGN KEY ([Category]) REFERENCES [dbo].[ProductCategories] ([ProductCategories])
+);
+
+CREATE TABLE [dbo].[ProductCategories] (
+    [ProductCategories] INT          NOT NULL,
+    [Name]              VARCHAR (50) NOT NULL,
+    PRIMARY KEY CLUSTERED ([ProductCategories] ASC)
+);
+
+CREATE TABLE [dbo].[UserLogin] (
+    [UserID]       INT           IDENTITY (1, 1) NOT NULL,
+    [Username]     VARCHAR (50)  NOT NULL,
+    [PasswordHash] VARCHAR (255) NOT NULL,
+    [Email]        VARCHAR (100) NOT NULL,
+    [Phone]        VARCHAR (20)  NOT NULL,
+    [CreatedAt]    DATETIME      DEFAULT (getdate()) NOT NULL,
+    PRIMARY KEY CLUSTERED ([UserID] ASC),
+    UNIQUE NONCLUSTERED ([Email] ASC),
+    UNIQUE NONCLUSTERED ([Username] ASC)
+);
+
