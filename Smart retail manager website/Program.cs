@@ -1,19 +1,38 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 using Smart_retail_manager_website.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Connection string
+var connString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Add EF Core DbContext
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(connString));
+
+// MVC + Views
 builder.Services.AddControllersWithViews();
 
-// If you use Session elsewhere in HomeController:
+// Session
 builder.Services.AddSession();
 
-// Our BillRepository for DB access
+// BillRepository for ADO.NET (Q2)
 builder.Services.AddScoped<BillRepository>();
+
+// Simple cookie-based authentication
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
+    });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -25,7 +44,9 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseSession();       // if you use Session for Bills
+app.UseSession();
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
@@ -33,4 +54,3 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
-

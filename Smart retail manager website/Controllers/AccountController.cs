@@ -38,8 +38,8 @@ namespace Smart_retail_manager_website.Controllers
                 return View();
             }
 
-            // Uses DbSet<Users> Users
-            var user = await _db.UserLogin
+            // Uses DbSet<UserLogin> UserLogins
+            var user = await _db.UserLogins
                 .FirstOrDefaultAsync(u => u.Username == username && u.PasswordHash == password);
 
             if (user == null)
@@ -83,7 +83,7 @@ namespace Smart_retail_manager_website.Controllers
                 return View(model);
             }
 
-            var exists = await _db.UserLogin
+            var exists = await _db.UserLogins
                 .AnyAsync(u => u.Username == model.Username || u.Email == model.Email);
 
             if (exists)
@@ -94,7 +94,7 @@ namespace Smart_retail_manager_website.Controllers
 
             model.CreatedAt = DateTime.Now;
 
-            _db.UserLogin.Add(model);
+            _db.UserLogins.Add(model);
             await _db.SaveChangesAsync();
 
             return RedirectToAction("Login");

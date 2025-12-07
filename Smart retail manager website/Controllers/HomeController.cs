@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Smart_retail_manager_website.Controllers
 {
-
+    
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;

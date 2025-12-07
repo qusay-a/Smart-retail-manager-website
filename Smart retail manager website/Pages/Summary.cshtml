@@ -9,6 +9,7 @@
             <th>Customer</th>
             <th>Date</th>
             <th>Total Amount</th>
+
         </tr>
     </thead>
     <tbody>
@@ -19,6 +20,10 @@
             <td>@bill.Cname</td>
             <td>@bill.DateOfInvoice.ToShortDateString()</td>
             <td>@bill.LineTotal</td>
+            <td>
+                <a asp-controller="Home" asp-action="Bills" asp-route-id="@bill.BillID">Details</a> |
+                <a asp-controller="Home" asp-action="DeleteBill" asp-route-id="@bill.BillID">Delete</a>
+            </td>
         </tr>
     }
     </tbody>

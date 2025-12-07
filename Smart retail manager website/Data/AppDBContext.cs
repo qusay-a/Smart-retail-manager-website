@@ -18,7 +18,7 @@ namespace Smart_retail_manager_website.Data
         // This is the linking table between Bill and Product in the DB
         public DbSet<BillProduct> BillProducts { get; set; }
 
-        public DbSet<UserLogin> UserLogin { get; set; }
+        public DbSet<UserLogin> Users { get; set; }
     }
 }
 
