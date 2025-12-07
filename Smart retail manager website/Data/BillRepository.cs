@@ -22,7 +22,7 @@ namespace Smart_retail_manager_website.Data
         {
             var result = new List<BillSummaryRow>();
 
-            // 1) Get connection string
+            // 1) Get connection string from DB
             var connString = _config.GetConnectionString("DefaultConnection");
             if (string.IsNullOrWhiteSpace(connString))
             {
