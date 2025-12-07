@@ -61,3 +61,5 @@ CREATE TABLE [dbo].[UserLogin] (
     UNIQUE NONCLUSTERED ([Username] ASC)
 );
 
+ALTER TABLE Bill_Products
+ADD Quantity INT NOT NULL DEFAULT 1;

@@ -66,6 +66,18 @@ namespace Smart_retail_manager_website.Data
             return result;
         }
 
+        // //
+        public async Task DeleteCustomerAsync(int customerId)
+        {
+            const string sql = @"DELETE FROM Customer WHERE CustomerID = @Id;";
+            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var cmd = new SqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("@Id", customerId);
+            await conn.OpenAsync();
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+
         //
         public async Task<int> InsertCustomerAsync(Customer c)
         {
@@ -101,10 +113,42 @@ namespace Smart_retail_manager_website.Data
             return Convert.ToInt32(await cmd.ExecuteScalarAsync());
         }
 
+        public async Task<Customer?> GetCustomerByIdAsync(int id)
+        {
+            const string sql = @"
+        SELECT CustomerID, Name, Email, Phone
+        FROM Customer
+        WHERE CustomerID = @Id;
+    ";
+
+            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var cmd = new SqlCommand(sql, conn);
+
+            cmd.Parameters.AddWithValue("@Id", id);
+
+            await conn.OpenAsync();
+            using var reader = await cmd.ExecuteReaderAsync();
+
+            if (await reader.ReadAsync())
+            {
+                return new Customer
+                {
+                    CustomerID = reader.GetInt32(0),
+                    Name = reader.GetString(1),
+                    Email = reader.IsDBNull(2) ? null! : reader.GetString(2),
+                    Phone = reader.IsDBNull(3) ? null! : reader.GetString(3)
+                };
+            }
+
+            return null;
+        }
+
+
+
         public async Task InsertBillItemAsync(int billId, int productId, decimal price, int qty)
         {
-            var sql = @"INSERT INTO Bill_Products (BillID, ProductID, Price)
-                VALUES (@BID, @PID, @Price)";
+            var sql = @"INSERT INTO Bill_Products (BillID, ProductID, Price, Quantity)
+                        VALUES (@BID, @PID, @Price, @Qty)";
 
             using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
             using var cmd = new SqlCommand(sql, conn);
@@ -112,10 +156,90 @@ namespace Smart_retail_manager_website.Data
             cmd.Parameters.AddWithValue("@BID", billId);
             cmd.Parameters.AddWithValue("@PID", productId);
             cmd.Parameters.AddWithValue("@Price", price);
+            cmd.Parameters.AddWithValue("@Qty", qty);
+
 
             await conn.OpenAsync();
             await cmd.ExecuteNonQueryAsync();
         }
+
+        // Update a customer's basic info
+        public async Task UpdateCustomerAsync(Customer c)
+        {
+            const string sql = @"
+        UPDATE Customer
+        SET Name = @Name,
+            Email = @Email,
+            Phone = @Phone
+        WHERE CustomerID = @Id;
+    ";
+
+            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var cmd = new SqlCommand(sql, conn);
+
+            cmd.Parameters.AddWithValue("@Name", c.Name);
+            cmd.Parameters.AddWithValue("@Email", (object?)c.Email ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@Phone", (object?)c.Phone ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@Id", c.CustomerID);
+
+            await conn.OpenAsync();
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        // Delete a bill (and its items) by ID
+        public async Task DeleteBillAsync(int billId)
+        {
+            // First delete child rows, then bill
+            const string sqlItems = @"DELETE FROM Bill_Products WHERE BillID = @Id;";
+            const string sqlBill = @"DELETE FROM Bill WHERE BillID = @Id;";
+
+            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+
+            using (var cmdItems = new SqlCommand(sqlItems, conn))
+            {
+                cmdItems.Parameters.AddWithValue("@Id", billId);
+                await cmdItems.ExecuteNonQueryAsync();
+            }
+
+            using (var cmdBill = new SqlCommand(sqlBill, conn))
+            {
+                cmdBill.Parameters.AddWithValue("@Id", billId);
+                await cmdBill.ExecuteNonQueryAsync();
+            }
+        }
+
+        public async Task<List<Customer>> GetAllCustomersAsync()
+        {
+            var list = new List<Customer>();
+
+            const string sql = @"
+        SELECT CustomerID, Name, Email, Phone
+        FROM Customer
+        ORDER BY Name;
+    ";
+
+            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var cmd = new SqlCommand(sql, conn);
+
+            await conn.OpenAsync();
+            using var reader = await cmd.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                list.Add(new Customer
+                {
+                    CustomerID = reader.GetInt32(0),
+                    Name = reader.GetString(1),
+                    Email = reader.IsDBNull(2) ? null! : reader.GetString(2),
+                    Phone = reader.IsDBNull(3) ? null! : reader.GetString(3),
+                });
+            }
+
+            return list;
+        }
+
+
 
         public async Task<List<Bill>> GetAllBillsAsync()
         {
@@ -150,6 +274,8 @@ namespace Smart_retail_manager_website.Data
 
             return list;
         }
+
+
 
         public async Task<BillDetailsDTO> GetBillDetailsAsync(int billId)
         {

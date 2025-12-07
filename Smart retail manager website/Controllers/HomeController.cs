@@ -3,19 +3,19 @@ using Microsoft.AspNetCore.Mvc;
 using Smart_retail_manager_website.Data;
 using Smart_retail_manager_website.Models;
 using Smart_retail_manager_website.Views.Home;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Smart_retail_manager_website.Controllers
 {
+
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
         private readonly BillRepository _billRepository;
-
-        private static int nextCustomerId = 1;
-        private static int nextBillId = 1;
-
         private readonly List<Product> allProducts = ProductsController.AllProducts;
 
         public double TaxRate { get; private set; }
@@ -31,6 +31,42 @@ namespace Smart_retail_manager_website.Controllers
         public IActionResult Privacy() => View();
 
         public IActionResult AddCustomers() => View();
+
+        public IActionResult EditCustomers() => View();
+
+        public async Task<IActionResult> Customers()
+        {
+            var customers = await _billRepository.GetAllCustomersAsync();
+            return View(customers);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DeleteCustomer(int id)
+        {
+            try
+            {
+                // Optionally, delete all bills for this customer first
+                var bills = await _billRepository.GetAllBillsAsync();
+                foreach (var bill in bills.Where(b => b.Customer.CustomerID == id))
+                {
+                    await _billRepository.DeleteBillAsync(bill.BillID);
+                }
+
+                // Delete the customer
+                await _billRepository.DeleteCustomerAsync(id);
+
+                TempData["Message"] = "Customer and their bills deleted successfully.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting customer");
+                TempData["Error"] = "An error occurred while deleting the customer.";
+            }
+
+            return RedirectToAction("Customers");
+        }
+
+
 
         [HttpGet]
         public async Task<IActionResult> Bills(int? id)
@@ -64,10 +100,10 @@ namespace Smart_retail_manager_website.Controllers
 
         [HttpPost]
         public async Task<IActionResult> Bills(
-    Customer customer,
-    List<int> selectedProducts,
-    List<int> productIds,
-    List<int> quantities)
+     Customer customer,
+     List<int> selectedProducts,
+     List<int> productIds,
+     List<int> quantities)
         {
             if (!ModelState.IsValid)
                 return View("AddCustomers", customer);
@@ -92,17 +128,24 @@ namespace Smart_retail_manager_website.Controllers
                 for (int i = 0; i < productIds.Count; i++)
                 {
                     int pid = productIds[i];
-                    if (!selectedProducts.Contains(pid)) continue;
+
+                    if (!selectedProducts.Contains(pid))
+                        continue;
 
                     var product = allProducts.FirstOrDefault(p => p.ProductID == pid);
-                    if (product == null) continue;
+                    if (product == null)
+                        continue;
 
                     int qty = Math.Min(quantities[i], product.QuantityInStock);
-                    if (qty <= 0) continue;
+                    if (qty <= 0)
+                        continue;
 
-                    await _billRepository.InsertBillItemAsync(billId, product.ProductID, product.UnitPrice, qty);
+                    await _billRepository.InsertBillItemAsync(
+                        billId,
+                        product.ProductID,
+                        product.UnitPrice,
+                        qty);
 
-                    // reduce stock
                     product.QuantityInStock -= qty;
                 }
 
@@ -121,6 +164,63 @@ namespace Smart_retail_manager_website.Controllers
                 TempData["Error"] = $"An error occurred while creating the bill: {ex.Message}";
                 return RedirectToAction("Error");
             }
+        }
+
+
+        // GET: /Home/EditCustomer/5
+        [HttpGet]
+        public async Task<IActionResult> EditCustomer(int id)
+        {
+            var customer = await _billRepository.GetCustomerByIdAsync(id);
+            if (customer == null)
+            {
+                TempData["Error"] = "Customer not found.";
+                return RedirectToAction("Summary");
+            }
+
+            return View(customer);
+        }
+
+
+        // POST: /Home/EditCustomer
+        [HttpPost]
+        public async Task<IActionResult> EditCustomer(Customer customer)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(customer);
+            }
+
+            try
+            {
+                await _billRepository.UpdateCustomerAsync(customer);
+                TempData["Message"] = "Customer updated successfully.";
+                return RedirectToAction("Summary");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating customer");
+                TempData["Error"] = "An error occurred while updating the customer.";
+                return View(customer);
+            }
+        }
+
+        // GET: /Home/DeleteBill/5
+        [HttpGet]
+        public async Task<IActionResult> DeleteBill(int id)
+        {
+            try
+            {
+                await _billRepository.DeleteBillAsync(id);
+                TempData["Message"] = "Bill deleted successfully.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting bill");
+                TempData["Error"] = "An error occurred while deleting the bill.";
+            }
+
+            return RedirectToAction("Summary");
         }
 
         public async Task<IActionResult> Summary()
