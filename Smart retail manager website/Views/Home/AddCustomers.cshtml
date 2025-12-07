@@ -1,62 +1,78 @@
 ﻿@model Smart_retail_manager_website.Models.Customer
+@using Smart_retail_manager_website.Models
+@using Smart_retail_manager_website.Controllers
+
 @{
-    ViewData["Title"] = "Add Customer";
-    Layout = "_Layout";
+    ViewData["Title"] = "New Order";
+
+    // use the same in-memory products as the controller
+    var products = ProductsController.AllProducts;
 }
 
-<h2>Add New Customer</h2>
+<h2>New Order</h2>
 
-<form asp-action="Bills" asp-controller="Home" method="post" id="customerForm">
-    <div class="mb-3">
-        <label class="form-label">Name</label>
-        <input asp-for="Name" class="form-control" required />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Phone</label>
-        <input asp-for="Phone" class="form-control" required />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Email</label>
-        <input asp-for="Email" class="form-control" required />
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<form asp-action="Bills" method="post">
+    <h4>Customer Information</h4>
+    <div class="form-group">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
     </div>
 
-    <h4>Select Products and Quantities</h4>
-    <table class="table table-bordered">
+    <div class="form-group">
+        <label asp-for="Phone"></label>
+        <input asp-for="Phone" class="form-control" />
+        <span asp-validation-for="Phone" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <h4>Products</h4>
+    <table class="table">
         <thead>
             <tr>
                 <th>Select</th>
                 <th>Product</th>
+                <th>Price</th>
                 <th>Quantity</th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td><input type="checkbox" name="selectedProducts" value="1" /></td>
-                <td>Laptop</td>
-                <td><input type="number" name="quantities[1]" min="1" value="1" class="form-control" /></td>
-            </tr>
-            <tr>
-                <td><input type="checkbox" name="selectedProducts" value="2" /></td>
-                <td>Notebook</td>
-                <td><input type="number" name="quantities[2]" min="1" value="1" class="form-control" /></td>
-            </tr>
-            <tr>
-                <td><input type="checkbox" name="selectedProducts" value="3" /></td>
-                <td>Milk</td>
-                <td><input type="number" name="quantities[3]" min="1" value="1" class="form-control" /></td>
-            </tr>
+            @for (int i = 0; i < products.Count; i++)
+            {
+                var p = products[i];
+                <tr>
+                    <td>
+                        <!-- One hidden productIds entry per row -->
+                        <input type="hidden" name="productIds" value="@p.ProductID" />
+                        <!-- Checkbox list: selectedProducts -->
+                        <input type="checkbox" name="selectedProducts" value="@p.ProductID" />
+                    </td>
+                    <td>@p.Name</td>
+                    <td>@p.UnitPrice</td>
+                    <td>
+                        <!-- Quantities list -->
+                        <input type="number" name="quantities"
+                               value="1" min="1" max="@p.QuantityInStock"
+                               class="form-control" />
+                    </td>
+                </tr>
+            }
         </tbody>
     </table>
 
-    <button type="submit" class="btn btn-success mt-3">Create Bill</button>
+    <button type="submit" class="btn btn-primary">Create Bill</button>
 </form>
 
-<script>
-    document.getElementById("customerForm").addEventListener("submit", function (e) {
-        const checked = document.querySelectorAll("input[name='selectedProducts']:checked");
-        if (checked.length === 0) {
-            alert("Please select at least one product.");
-            e.preventDefault();
-        }
-    });
-</script>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

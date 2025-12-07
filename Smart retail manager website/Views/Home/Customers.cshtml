@@ -1,0 +1,44 @@
+﻿@model List<Smart_retail_manager_website.Models.Customer>
+
+@{
+    ViewData["Title"] = "Customers";
+}
+
+<h2>Customers</h2>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td>@c.Name</td>
+                <td>@c.Phone</td>
+                <td>@c.Email</td>
+                <td>
+                    <a asp-action="EditCustomer" asp-route-id="@c.CustomerID">Edit</a> |
+                    <a asp-action="DeleteCustomer" asp-route-id="@c.CustomerID"
+                       onclick="return confirm('Delete this customer and all their bills?');">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
