@@ -10,9 +10,9 @@ namespace Smart_retail_manager_website.Controllers
     {
         public static List<Product> AllProducts = new List<Product>
     {
-            new Product(4, "Laptop",   ProductCategories.Electronics, 499.99m, 8),
-            new Product(5, "Notebook", ProductCategories.Stationery,  1.50m,   100),
-            new Product(6, "Milk",     ProductCategories.Groceries,   0.95m,   12)
+            new Product(1, "Laptop",   ProductCategories.Electronics, 499.99m, 8),
+            new Product(2, "Notebook", ProductCategories.Stationery,  1.50m,   100),
+            new Product(3, "Milk",     ProductCategories.Groceries,   0.95m,   12)
     };
 
 
