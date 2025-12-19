@@ -17,8 +17,6 @@ builder.Services.AddControllersWithViews();
 // Session
 builder.Services.AddSession();
 
-// BillRepository for ADO.NET (Q2)
-builder.Services.AddScoped<BillRepository>();
 
 // Simple cookie-based authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

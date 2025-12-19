@@ -39,7 +39,7 @@ namespace Smart_retail_manager_website.Controllers
             }
 
             // Uses DbSet<UserLogin> UserLogins
-            var user = await _db.UserLogins
+            var user = await _db.Users
                 .FirstOrDefaultAsync(u => u.Username == username && u.PasswordHash == password);
 
             if (user == null)
@@ -49,10 +49,17 @@ namespace Smart_retail_manager_website.Controllers
             }
 
             var claims = new[]
-            {
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim("Email", user.Email)
+              {
+                new System.Security.Claims.Claim(
+                    System.Security.Claims.ClaimTypes.Name,
+                    user.Username
+                ),
+                new System.Security.Claims.Claim(
+                    "Email",
+                    user.Email
+                )
             };
+
 
             var identity = new ClaimsIdentity(
                 claims,
@@ -83,7 +90,7 @@ namespace Smart_retail_manager_website.Controllers
                 return View(model);
             }
 
-            var exists = await _db.UserLogins
+            var exists = await _db.Users
                 .AnyAsync(u => u.Username == model.Username || u.Email == model.Email);
 
             if (exists)
@@ -94,7 +101,7 @@ namespace Smart_retail_manager_website.Controllers
 
             model.CreatedAt = DateTime.Now;
 
-            _db.UserLogins.Add(model);
+            _db.Users.Add(model);
             await _db.SaveChangesAsync();
 
             return RedirectToAction("Login");
