@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-﻿namespace Smart_retail_manager_website.Models
+namespace Smart_retail_manager_website.Models
 {
     public class Customer
     {

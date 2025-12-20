@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-﻿namespace Smart_retail_manager_website.Models
+namespace Smart_retail_manager_website.Models
 {
     public class Product
     {
@@ -9,7 +9,7 @@ using System.ComponentModel.DataAnnotations;
         [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters")]
         public string Name { get; set; }
         [Required(ErrorMessage = "Category is required")]
-        public ProductCategories Category {get; set;}
+        public ProductCategories Category { get; set; }
         [Range(0.01, 1000000, ErrorMessage = "Price must be positive")]
         public decimal UnitPrice { get; set; }
         [Range(0, 1000000, ErrorMessage = "Quantity cannot be negative")]
