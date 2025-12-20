@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Smart_retail_manager_website.Data;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,14 +12,19 @@ var connString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connString));
 
-// MVC + Views
-builder.Services.AddControllersWithViews();
 
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(o =>
+    {
+        o.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        o.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    });
+
+
+builder.Services.AddDistributedMemoryCache();
 // Session
 builder.Services.AddSession();
 
-// BillRepository for ADO.NET (Q2)
-builder.Services.AddScoped<BillRepository>();
 
 // Simple cookie-based authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -29,6 +35,18 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddScoped<BillRepository>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("RemoteClientPolicy", policy =>
+    {
+        policy.WithOrigins("https://localhost:5002", "http://localhost:5002") // <-- remote app URL
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 
 var app = builder.Build();
 
@@ -41,6 +59,9 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+app.UseCors("RemoteClientPolicy");
+app.MapControllers();
 
 app.UseRouting();
 
