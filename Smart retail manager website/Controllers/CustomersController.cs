@@ -10,20 +10,20 @@ using Smart_retail_manager_website.Models;
 
 namespace Smart_retail_manager_website.Controllers
 {
-    public class CustomersController : Controller
+    public class CustomerController : Controller
     {
         private readonly AppDbContext _context;
 
-        public CustomersController(AppDbContext context)
+        public CustomerController(AppDbContext context)
         {
             _context = context;
         }
 
-        // GET: Customers
-        // GET: Customers (with search)
+        // GET: Customer
+        // GET: Customer (with search)
         public async Task<IActionResult> Index(string? q)
         {
-            var query = _context.Customers.AsQueryable();
+            var query = _context.Customer.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(q))
             {
@@ -37,7 +37,7 @@ namespace Smart_retail_manager_website.Controllers
         }
 
 
-        // GET: Customers/Details/5
+        // GET: Customer/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -45,7 +45,7 @@ namespace Smart_retail_manager_website.Controllers
                 return NotFound();
             }
 
-            var customer = await _context.Customers
+            var customer = await _context.Customer
                 .FirstOrDefaultAsync(m => m.CustomerID == id);
             if (customer == null)
             {
@@ -55,13 +55,13 @@ namespace Smart_retail_manager_website.Controllers
             return View(customer);
         }
 
-        // GET: Customers/Create
+        // GET: Customer/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Customers/Create
+        // POST: Customer/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -77,7 +77,7 @@ namespace Smart_retail_manager_website.Controllers
             return View(customer);
         }
 
-        // GET: Customers/Edit/5
+        // GET: Customer/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -85,7 +85,7 @@ namespace Smart_retail_manager_website.Controllers
                 return NotFound();
             }
 
-            var customer = await _context.Customers.FindAsync(id);
+            var customer = await _context.Customer.FindAsync(id);
             if (customer == null)
             {
                 return NotFound();
@@ -93,7 +93,7 @@ namespace Smart_retail_manager_website.Controllers
             return View(customer);
         }
 
-        // POST: Customers/Edit/5
+        // POST: Customer/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -128,7 +128,7 @@ namespace Smart_retail_manager_website.Controllers
             return View(customer);
         }
 
-        // GET: Customers/Delete/5
+        // GET: Customer/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -136,7 +136,7 @@ namespace Smart_retail_manager_website.Controllers
                 return NotFound();
             }
 
-            var customer = await _context.Customers
+            var customer = await _context.Customer
                 .FirstOrDefaultAsync(m => m.CustomerID == id);
             if (customer == null)
             {
@@ -146,15 +146,15 @@ namespace Smart_retail_manager_website.Controllers
             return View(customer);
         }
 
-        // POST: Customers/Delete/5
+        // POST: Customer/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var customer = await _context.Customers.FindAsync(id);
+            var customer = await _context.Customer.FindAsync(id);
             if (customer != null)
             {
-                _context.Customers.Remove(customer);
+                _context.Customer.Remove(customer);
             }
 
             await _context.SaveChangesAsync();
@@ -163,7 +163,7 @@ namespace Smart_retail_manager_website.Controllers
 
         private bool CustomerExists(int id)
         {
-            return _context.Customers.Any(e => e.CustomerID == id);
+            return _context.Customer.Any(e => e.CustomerID == id);
         }
     }
 }

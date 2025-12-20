@@ -10,19 +10,19 @@ using Smart_retail_manager_website.Models;
 
 namespace Smart_retail_manager_website.Controllers
 {
-    public class BillsController : Controller
+    public class BillController : Controller
     {
         private readonly AppDbContext _context;
 
-        public BillsController(AppDbContext context)
+        public BillController(AppDbContext context)
         {
             _context = context;
         }
 
-        // GET: Bills (with search by customer name)
+        // GET: Bill (with search by customer name)
         public async Task<IActionResult> Index(string? q)
         {
-            var query = _context.Bills
+            var query = _context.Bill
                 .Include(b => b.Customer)
                 .AsQueryable();
 
@@ -35,7 +35,7 @@ namespace Smart_retail_manager_website.Controllers
         }
 
 
-        // GET: Bills/Details/5
+        // GET: Bill/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -43,7 +43,7 @@ namespace Smart_retail_manager_website.Controllers
                 return NotFound();
             }
 
-            var bill = await _context.Bills
+            var bill = await _context.Bill
                 .Include(b => b.Customer)
                 .FirstOrDefaultAsync(m => m.BillID == id);
             if (bill == null)
@@ -54,14 +54,14 @@ namespace Smart_retail_manager_website.Controllers
             return View(bill);
         }
 
-        // GET: Bills/Create
+        // GET: Bill/Create
         public IActionResult Create()
         {
-            ViewData["CustomerID"] = new SelectList(_context.Customers, "CustomerID", "Name");
+            ViewData["CustomerID"] = new SelectList(_context.Customer, "CustomerID", "Name");
             return View();
         }
 
-        // POST: Bills/Create
+        // POST: Bill/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -74,11 +74,11 @@ namespace Smart_retail_manager_website.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CustomerID"] = new SelectList(_context.Customers, "CustomerID", "Name", bill.CustomerID);
+            ViewData["CustomerID"] = new SelectList(_context.Customer, "CustomerID", "Name", bill.CustomerID);
             return View(bill);
         }
 
-        // GET: Bills/Edit/5
+        // GET: Bill/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -86,16 +86,16 @@ namespace Smart_retail_manager_website.Controllers
                 return NotFound();
             }
 
-            var bill = await _context.Bills.FindAsync(id);
+            var bill = await _context.Bill.FindAsync(id);
             if (bill == null)
             {
                 return NotFound();
             }
-            ViewData["CustomerID"] = new SelectList(_context.Customers, "CustomerID", "Name", bill.CustomerID);
+            ViewData["CustomerID"] = new SelectList(_context.Customer, "CustomerID", "Name", bill.CustomerID);
             return View(bill);
         }
 
-        // POST: Bills/Edit/5
+        // POST: Bill/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -127,11 +127,11 @@ namespace Smart_retail_manager_website.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CustomerID"] = new SelectList(_context.Customers, "CustomerID", "Name", bill.CustomerID);
+            ViewData["CustomerID"] = new SelectList(_context.Customer, "CustomerID", "Name", bill.CustomerID);
             return View(bill);
         }
 
-        // GET: Bills/Delete/5
+        // GET: Bill/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -139,7 +139,7 @@ namespace Smart_retail_manager_website.Controllers
                 return NotFound();
             }
 
-            var bill = await _context.Bills
+            var bill = await _context.Bill
                 .Include(b => b.Customer)
                 .FirstOrDefaultAsync(m => m.BillID == id);
             if (bill == null)
@@ -150,15 +150,15 @@ namespace Smart_retail_manager_website.Controllers
             return View(bill);
         }
 
-        // POST: Bills/Delete/5
+        // POST: Bill/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var bill = await _context.Bills.FindAsync(id);
+            var bill = await _context.Bill.FindAsync(id);
             if (bill != null)
             {
-                _context.Bills.Remove(bill);
+                _context.Bill.Remove(bill);
             }
 
             await _context.SaveChangesAsync();
@@ -167,7 +167,7 @@ namespace Smart_retail_manager_website.Controllers
 
         private bool BillExists(int id)
         {
-            return _context.Bills.Any(e => e.BillID == id);
+            return _context.Bill.Any(e => e.BillID == id);
         }
     }
 }

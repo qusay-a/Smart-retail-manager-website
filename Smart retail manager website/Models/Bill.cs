@@ -20,11 +20,11 @@ namespace Smart_retail_manager_website.Models
         public decimal TaxRate { get; set; } = 0.05m;
 
         // link table
-        public List<BillProduct> BillProducts { get; set; } = new();
+        public List<BillProduct> Bill_Products { get; set; } = new();
 
         public decimal CalcSubTotal()
         {
-            return BillProducts?.Sum(bp => bp.Price * bp.Quantity) ?? 0m;
+            return (decimal)(Bill_Products?.Sum(bp => bp.Price * bp.Quantity) ?? 0.0);
         }
 
         public decimal CalculateTotal()

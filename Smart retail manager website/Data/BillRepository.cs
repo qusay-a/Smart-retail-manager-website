@@ -18,9 +18,9 @@ namespace Smart_retail_manager_website.Data
             _config = config;
         }
 
-        public async Task<List<BillSummaryRow>> GetBillSummaryAsync()
+        public async Task<List<BillummaryRow>> GetBillummaryAsync()
         {
-            var result = new List<BillSummaryRow>();
+            var result = new List<BillummaryRow>();
 
             // 1) Get connection string from DB
             var connString = _config.GetConnectionString("DefaultConnection");
@@ -34,7 +34,7 @@ namespace Smart_retail_manager_website.Data
             // 2) Query the SQL view
             const string sql = @"
                 SELECT BillID, Cname, DateOfInvoice, LineTotal
-                FROM vw_billSummary;
+                FROM vw_Billummary;
             ";
 
             using var conn = new SqlConnection(connString);
@@ -51,7 +51,7 @@ namespace Smart_retail_manager_website.Data
 
             while (await reader.ReadAsync())
             {
-                var row = new BillSummaryRow
+                var row = new BillummaryRow
                 {
                     BillID = reader.IsDBNull(ordBillID) ? 0 : reader.GetInt32(ordBillID),
                     Cname = reader.IsDBNull(ordCname) ? string.Empty : reader.GetString(ordCname),
@@ -209,7 +209,7 @@ namespace Smart_retail_manager_website.Data
             }
         }
 
-        public async Task<List<Customer>> GetAllCustomersAsync()
+        public async Task<List<Customer>> GetAllCustomerAsync()
         {
             var list = new List<Customer>();
 
@@ -241,7 +241,7 @@ namespace Smart_retail_manager_website.Data
 
 
 
-        public async Task<List<Bill>> GetAllBillsAsync()
+        public async Task<List<Bill>> GetAllBillAsync()
         {
             var list = new List<Bill>();
             var connString = _config.GetConnectionString("DefaultConnection");

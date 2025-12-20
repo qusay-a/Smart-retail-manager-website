@@ -12,22 +12,21 @@ namespace Smart_retail_manager_website.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ApiCustomersController : ControllerBase
+    public class ApiCustomerController : ControllerBase
     {
         private readonly AppDbContext _context;
 
-        public ApiCustomersController(AppDbContext context)
+        public ApiCustomerController(AppDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/ApiCustomers
+        // GET: api/ApiCustomer
+        // GET: api/ApiCustomer?q=ali
         [HttpGet]
-        // GET: api/ApiCustomers?q=ali
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers([FromQuery] string? q)
+        public async Task<ActionResult<IEnumerable<Customer>>> GetCustomer([FromQuery] string? q)
         {
-            var query = _context.Customers.AsQueryable();
+            var query = _context.Customer.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(q))
             {
@@ -41,11 +40,11 @@ namespace Smart_retail_manager_website.Controllers
         }
 
 
-        // GET: api/ApiCustomers/5
+        // GET: api/ApiCustomer/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Customer>> GetCustomer(int id)
         {
-            var customer = await _context.Customers.FindAsync(id);
+            var customer = await _context.Customer.FindAsync(id);
 
             if (customer == null)
             {
@@ -55,7 +54,7 @@ namespace Smart_retail_manager_website.Controllers
             return customer;
         }
 
-        // PUT: api/ApiCustomers/5
+        // PUT: api/ApiCustomer/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCustomer(int id, Customer customer)
@@ -86,28 +85,28 @@ namespace Smart_retail_manager_website.Controllers
             return NoContent();
         }
 
-        // POST: api/ApiCustomers
+        // POST: api/ApiCustomer
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Customer>> PostCustomer(Customer customer)
         {
-            _context.Customers.Add(customer);
+            _context.Customer.Add(customer);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetCustomer", new { id = customer.CustomerID }, customer);
         }
 
-        // DELETE: api/ApiCustomers/5
+        // DELETE: api/ApiCustomer/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
-            var customer = await _context.Customers.FindAsync(id);
+            var customer = await _context.Customer.FindAsync(id);
             if (customer == null)
             {
                 return NotFound();
             }
 
-            _context.Customers.Remove(customer);
+            _context.Customer.Remove(customer);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -115,7 +114,7 @@ namespace Smart_retail_manager_website.Controllers
 
         private bool CustomerExists(int id)
         {
-            return _context.Customers.Any(e => e.CustomerID == id);
+            return _context.Customer.Any(e => e.CustomerID == id);
         }
     }
 }

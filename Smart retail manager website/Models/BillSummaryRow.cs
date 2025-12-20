@@ -1,7 +1,7 @@
 ﻿namespace Smart_retail_manager_website.Models
 {
     using System;
-    public class BillSummaryRow
+    public class BillummaryRow
     {
         public int BillID { get; set; }
         public string Cname { get; set; } = String.Empty;

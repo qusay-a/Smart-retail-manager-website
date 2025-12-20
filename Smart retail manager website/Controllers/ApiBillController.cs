@@ -12,22 +12,22 @@ namespace Smart_retail_manager_website.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ApiBillsController : ControllerBase
+    public class ApiBillController : ControllerBase
     {
         private readonly AppDbContext _context;
 
-        public ApiBillsController(AppDbContext context)
+        public ApiBillController(AppDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/ApiBills?q=ali
+        // GET: api/ApiBill?q=ali
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Bill>>> GetBills([FromQuery] string? q)
+        public async Task<ActionResult<IEnumerable<Bill>>> GetBill([FromQuery] string? q)
         {
-            var query = _context.Bills
+            var query = _context.Bill
                 .Include(b => b.Customer)
-                .Include(b => b.BillProducts)
+                .Include(b => b.Bill_Products)
                     .ThenInclude(bp => bp.Product)
                 .AsQueryable();
 
@@ -40,13 +40,13 @@ namespace Smart_retail_manager_website.Controllers
         }
 
 
-        // GET: api/ApiBills/5
+        // GET: api/ApiBill/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Bill>> GetBill(int id)
         {
-            var bill = await _context.Bills
+            var bill = await _context.Bill
             .Include(b => b.Customer)
-            .Include(b => b.BillProducts)
+            .Include(b => b.Bill_Products)
                 .ThenInclude(bp => bp.Product)
             .FirstOrDefaultAsync(b => b.BillID == id);
 
@@ -59,54 +59,46 @@ namespace Smart_retail_manager_website.Controllers
 
         }
 
-        // PUT: api/ApiBills/5
+        // PUT: api/ApiBill/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBill(int id, Bill bill)
+        public async Task<IActionResult> PutBill(int id, Bill dto)
         {
-            if (id != bill.BillID)
-            {
+            if (id != dto.BillID)
                 return BadRequest();
-            }
 
-            _context.Entry(bill).State = EntityState.Modified;
+            // Load the existing Bill from DB (tracked entity)
+            var bill = await _context.Bill.FirstOrDefaultAsync(b => b.BillID == id);
+            if (bill == null)
+                return NotFound();
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!BillExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            // Update ONLY scalar columns
+            bill.Date = dto.Date;
+            bill.CustomerID = dto.CustomerID;
+            bill.TaxRate = dto.TaxRate;
 
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 
-        // POST: api/ApiBills
+
+        // POST: api/ApiBill
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Bill>> PostBill(Bill bill)
         {
-            _context.Bills.Add(bill);
+            _context.Bill.Add(bill);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetBill", new { id = bill.BillID }, bill);
         }
 
-        // DELETE: api/ApiBills/5
+        // DELETE: api/ApiBill/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBill(int id)
         {
-            var bill = await _context.Bills
-            .Include(b => b.BillProducts)
+            var bill = await _context.Bill
+            .Include(b => b.Bill_Products)
             .FirstOrDefaultAsync(b => b.BillID == id);
 
             if (bill == null)
@@ -114,8 +106,8 @@ namespace Smart_retail_manager_website.Controllers
                 return NotFound();
             }
 
-            _context.BillProducts.RemoveRange(bill.BillProducts);
-            _context.Bills.Remove(bill);
+            _context.Bill_Products.RemoveRange(bill.Bill_Products);
+            _context.Bill.Remove(bill);
 
             await _context.SaveChangesAsync();
             return NoContent();
@@ -123,7 +115,7 @@ namespace Smart_retail_manager_website.Controllers
 
         private bool BillExists(int id)
         {
-            return _context.Bills.Any(e => e.BillID == id);
+            return _context.Bill.Any(e => e.BillID == id);
         }
     }
 }

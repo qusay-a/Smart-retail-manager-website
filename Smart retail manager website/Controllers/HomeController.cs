@@ -11,12 +11,12 @@ using System.Threading.Tasks;
 
 namespace Smart_retail_manager_website.Controllers
 {
-    
+
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
         private readonly BillRepository _billRepository;
-        private readonly List<Product> allProducts = ProductsController.AllProducts;
+        private readonly List<Product> allProduct = ProductController.AllProduct;
 
         public double TaxRate { get; private set; }
 
@@ -30,14 +30,14 @@ namespace Smart_retail_manager_website.Controllers
 
         public IActionResult Privacy() => View();
 
-        public IActionResult AddCustomers() => View();
+        public IActionResult AddCustomer() => View();
 
-        public IActionResult EditCustomers() => View();
+        public IActionResult EditCustomer() => View();
 
-        public async Task<IActionResult> Customers()
+        public async Task<IActionResult> Customer()
         {
-            var customers = await _billRepository.GetAllCustomersAsync();
-            return View(customers);
+            var Customer = await _billRepository.GetAllCustomerAsync();
+            return View(Customer);
         }
 
         [HttpGet]
@@ -45,9 +45,9 @@ namespace Smart_retail_manager_website.Controllers
         {
             try
             {
-                // Optionally, delete all bills for this customer first
-                var bills = await _billRepository.GetAllBillsAsync();
-                foreach (var bill in bills.Where(b => b.Customer.CustomerID == id))
+                // Optionally, delete all Bill for this customer first
+                var Bill = await _billRepository.GetAllBillAsync();
+                foreach (var bill in Bill.Where(b => b.Customer.CustomerID == id))
                 {
                     await _billRepository.DeleteBillAsync(bill.BillID);
                 }
@@ -55,7 +55,7 @@ namespace Smart_retail_manager_website.Controllers
                 // Delete the customer
                 await _billRepository.DeleteCustomerAsync(id);
 
-                TempData["Message"] = "Customer and their bills deleted successfully.";
+                TempData["Message"] = "Customer and their Bill deleted successfully.";
             }
             catch (Exception ex)
             {
@@ -63,13 +63,13 @@ namespace Smart_retail_manager_website.Controllers
                 TempData["Error"] = "An error occurred while deleting the customer.";
             }
 
-            return RedirectToAction("Customers");
+            return RedirectToAction("Customer");
         }
 
 
 
         [HttpGet]
-        public async Task<IActionResult> Bills(int? id)
+        public async Task<IActionResult> Bill(int? id)
         {
             try
             {
@@ -92,32 +92,32 @@ namespace Smart_retail_manager_website.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error while loading bills.");
-                TempData["Error"] = "An unexpected error occurred while loading the bills.";
+                _logger.LogError(ex, "Error while loading Bill.");
+                TempData["Error"] = "An unexpected error occurred while loading the Bill.";
                 return RedirectToAction("Error");
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> Bills(
+        public async Task<IActionResult> Bill(
      Customer customer,
-     List<int> selectedProducts,
+     List<int> selectedProduct,
      List<int> productIds,
      List<int> quantities)
         {
             if (!ModelState.IsValid)
-                return View("AddCustomers", customer);
+                return View("AddCustomer", customer);
 
-            if (selectedProducts == null || selectedProducts.Count == 0)
+            if (selectedProduct == null || selectedProduct.Count == 0)
             {
                 TempData["Error"] = "You must select at least one product.";
-                return View("AddCustomers", customer);
+                return View("AddCustomer", customer);
             }
 
             if (productIds == null || quantities == null || productIds.Count != quantities.Count)
             {
                 TempData["Error"] = "Invalid product selection.";
-                return View("AddCustomers", customer);
+                return View("AddCustomer", customer);
             }
 
             try
@@ -129,10 +129,10 @@ namespace Smart_retail_manager_website.Controllers
                 {
                     int pid = productIds[i];
 
-                    if (!selectedProducts.Contains(pid))
+                    if (!selectedProduct.Contains(pid))
                         continue;
 
-                    var product = allProducts.FirstOrDefault(p => p.ProductID == pid);
+                    var product = allProduct.FirstOrDefault(p => p.ProductID == pid);
                     if (product == null)
                         continue;
 
@@ -225,27 +225,27 @@ namespace Smart_retail_manager_website.Controllers
 
         public async Task<IActionResult> Summary()
         {
-            var list = await _billRepository.GetBillSummaryAsync();
+            var list = await _billRepository.GetBillummaryAsync();
 
             var model = new SummaryModel
             {
-                Bills = list
+                Bill = list
             };
 
             return View(model);
         }
-        private List<Bill> GetBillsFromSession()
+        private List<Bill> GetBillFromSession()
         {
-            var data = HttpContext.Session.GetString("Bills");
+            var data = HttpContext.Session.GetString("Bill");
             return string.IsNullOrEmpty(data)
                 ? new List<Bill>()
                 : JsonSerializer.Deserialize<List<Bill>>(data) ?? new List<Bill>();
         }
 
-        private void SaveBillsToSession(List<Bill> bills)
+        private void SaveBillToSession(List<Bill> Bill)
         {
-            var json = JsonSerializer.Serialize(bills);
-            HttpContext.Session.SetString("Bills", json);
+            var json = JsonSerializer.Serialize(Bill);
+            HttpContext.Session.SetString("Bill", json);
         }
 
         public IActionResult ForceError()

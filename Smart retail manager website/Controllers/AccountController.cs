@@ -27,7 +27,7 @@ namespace Smart_retail_manager_website.Controllers
         }
 
         // POST: /Account/Login
-        
+
         // NOTE: we add users in DB before running the program
         [HttpPost]
         public async Task<IActionResult> Login(string username, string password)
