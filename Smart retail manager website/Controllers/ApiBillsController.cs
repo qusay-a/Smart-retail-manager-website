@@ -1,0 +1,129 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Smart_retail_manager_website.Data;
+using Smart_retail_manager_website.Models;
+
+namespace Smart_retail_manager_website.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ApiBillsController : ControllerBase
+    {
+        private readonly AppDbContext _context;
+
+        public ApiBillsController(AppDbContext context)
+        {
+            _context = context;
+        }
+
+        // GET: api/ApiBills?q=ali
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Bill>>> GetBills([FromQuery] string? q)
+        {
+            var query = _context.Bills
+                .Include(b => b.Customer)
+                .Include(b => b.BillProducts)
+                    .ThenInclude(bp => bp.Product)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                query = query.Where(b => b.Customer.Name.Contains(q));
+            }
+
+            return await query.OrderByDescending(b => b.Date).ToListAsync();
+        }
+
+
+        // GET: api/ApiBills/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Bill>> GetBill(int id)
+        {
+            var bill = await _context.Bills
+            .Include(b => b.Customer)
+            .Include(b => b.BillProducts)
+                .ThenInclude(bp => bp.Product)
+            .FirstOrDefaultAsync(b => b.BillID == id);
+
+            if (bill == null)
+            {
+                return NotFound();
+            }
+
+            return bill;
+
+        }
+
+        // PUT: api/ApiBills/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutBill(int id, Bill bill)
+        {
+            if (id != bill.BillID)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(bill).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!BillExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        // POST: api/ApiBills
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<Bill>> PostBill(Bill bill)
+        {
+            _context.Bills.Add(bill);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetBill", new { id = bill.BillID }, bill);
+        }
+
+        // DELETE: api/ApiBills/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteBill(int id)
+        {
+            var bill = await _context.Bills
+            .Include(b => b.BillProducts)
+            .FirstOrDefaultAsync(b => b.BillID == id);
+
+            if (bill == null)
+            {
+                return NotFound();
+            }
+
+            _context.BillProducts.RemoveRange(bill.BillProducts);
+            _context.Bills.Remove(bill);
+
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
+        private bool BillExists(int id)
+        {
+            return _context.Bills.Any(e => e.BillID == id);
+        }
+    }
+}
