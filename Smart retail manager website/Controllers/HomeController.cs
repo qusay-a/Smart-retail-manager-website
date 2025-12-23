@@ -1,17 +1,18 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Smart_retail_manager_website.Data;
 using Smart_retail_manager_website.Models;
 using Smart_retail_manager_website.Views.Home;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Smart_retail_manager_website.Controllers
 {
-
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -30,14 +31,18 @@ namespace Smart_retail_manager_website.Controllers
 
         public IActionResult Privacy() => View();
 
-        public IActionResult AddCustomer() => View();
+
+        public IActionResult AddCustomer()
+            => View("~/Views/Home/AddCustomers.cshtml");
+
 
         public IActionResult EditCustomer() => View();
 
+
         public async Task<IActionResult> Customer()
         {
-            var Customer = await _billRepository.GetAllCustomerAsync();
-            return View(Customer);
+            var customers = await _billRepository.GetAllCustomerAsync();
+            return View("~/Views/Home/Customers.cshtml", customers);
         }
 
         [HttpGet]
@@ -46,8 +51,8 @@ namespace Smart_retail_manager_website.Controllers
             try
             {
                 // Optionally, delete all Bill for this customer first
-                var Bill = await _billRepository.GetAllBillAsync();
-                foreach (var bill in Bill.Where(b => b.Customer.CustomerID == id))
+                var bills = await _billRepository.GetAllBillAsync();
+                foreach (var bill in bills.Where(b => b.Customer.CustomerID == id))
                 {
                     await _billRepository.DeleteBillAsync(bill.BillID);
                 }
@@ -66,8 +71,7 @@ namespace Smart_retail_manager_website.Controllers
             return RedirectToAction("Customer");
         }
 
-
-
+        // GET: /Home/Bill/5
         [HttpGet]
         public async Task<IActionResult> Bill(int? id)
         {
@@ -81,13 +85,13 @@ namespace Smart_retail_manager_website.Controllers
 
                 var dbBill = await _billRepository.GetBillDetailsAsync(id.Value);
 
-                // Add this null check here too
                 if (dbBill == null)
                 {
                     TempData["Error"] = "Bill not found.";
                     return RedirectToAction("Summary");
                 }
 
+                // View file: /Views/Home/BillDetails.cshtml
                 return View("BillDetails", dbBill);
             }
             catch (Exception ex)
@@ -98,26 +102,28 @@ namespace Smart_retail_manager_website.Controllers
             }
         }
 
+        // POST: /Home/Bill
         [HttpPost]
         public async Task<IActionResult> Bill(
-     Customer customer,
-     List<int> selectedProduct,
-     List<int> productIds,
-     List<int> quantities)
+            Customer customer,
+            List<int> selectedProduct,
+            List<int> productIds,
+            List<int> quantities)
         {
+            // all "AddCustomer" views changed to the correct path AddCustomers.cshtml
             if (!ModelState.IsValid)
-                return View("AddCustomer", customer);
+                return View("~/Views/Home/AddCustomers.cshtml", customer);
 
             if (selectedProduct == null || selectedProduct.Count == 0)
             {
                 TempData["Error"] = "You must select at least one product.";
-                return View("AddCustomer", customer);
+                return View("~/Views/Home/AddCustomers.cshtml", customer);
             }
 
             if (productIds == null || quantities == null || productIds.Count != quantities.Count)
             {
                 TempData["Error"] = "Invalid product selection.";
-                return View("AddCustomer", customer);
+                return View("~/Views/Home/AddCustomers.cshtml", customer);
             }
 
             try
@@ -166,7 +172,6 @@ namespace Smart_retail_manager_website.Controllers
             }
         }
 
-
         // GET: /Home/EditCustomer/5
         [HttpGet]
         public async Task<IActionResult> EditCustomer(int id)
@@ -178,9 +183,9 @@ namespace Smart_retail_manager_website.Controllers
                 return RedirectToAction("Summary");
             }
 
-            return View(customer);
+            // View: /Views/Home/EditCustomer.cshtml
+            return View("~/Views/Home/EditCustomer.cshtml", customer);
         }
-
 
         // POST: /Home/EditCustomer
         [HttpPost]
@@ -188,7 +193,7 @@ namespace Smart_retail_manager_website.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View(customer);
+                return View("~/Views/Home/EditCustomer.cshtml", customer);
             }
 
             try
@@ -201,7 +206,7 @@ namespace Smart_retail_manager_website.Controllers
             {
                 _logger.LogError(ex, "Error updating customer");
                 TempData["Error"] = "An error occurred while updating the customer.";
-                return View(customer);
+                return View("~/Views/Home/EditCustomer.cshtml", customer);
             }
         }
 
@@ -232,8 +237,10 @@ namespace Smart_retail_manager_website.Controllers
                 Bill = list
             };
 
-            return View(model);
+            // View: /Views/Home/Summary.cshtml
+            return View("~/Views/Home/Summary.cshtml", model);
         }
+
         private List<Bill> GetBillFromSession()
         {
             var data = HttpContext.Session.GetString("Bill");
@@ -242,9 +249,9 @@ namespace Smart_retail_manager_website.Controllers
                 : JsonSerializer.Deserialize<List<Bill>>(data) ?? new List<Bill>();
         }
 
-        private void SaveBillToSession(List<Bill> Bill)
+        private void SaveBillToSession(List<Bill> bills)
         {
-            var json = JsonSerializer.Serialize(Bill);
+            var json = JsonSerializer.Serialize(bills);
             HttpContext.Session.SetString("Bill", json);
         }
 

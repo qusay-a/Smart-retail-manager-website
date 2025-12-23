@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Smart_retail_manager_website.Data;
 using Smart_retail_manager_website.Models;
@@ -19,7 +18,6 @@ namespace Smart_retail_manager_website.Controllers
             _context = context;
         }
 
-        // GET: Customer
         // GET: Customer (with search)
         public async Task<IActionResult> Index(string? q)
         {
@@ -33,9 +31,10 @@ namespace Smart_retail_manager_website.Controllers
                     c.Phone.Contains(q));
             }
 
-            return View(await query.OrderBy(c => c.Name).ToListAsync());
-        }
 
+            return View("~/Views/Customers/Index.cshtml",
+                        await query.OrderBy(c => c.Name).ToListAsync());
+        }
 
         // GET: Customer/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -52,18 +51,17 @@ namespace Smart_retail_manager_website.Controllers
                 return NotFound();
             }
 
-            return View(customer);
+            return View("~/Views/Customers/Details.cshtml", customer);
         }
 
         // GET: Customer/Create
         public IActionResult Create()
         {
-            return View();
+
+            return View("~/Views/Customers/Create.cshtml");
         }
 
         // POST: Customer/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CustomerID,Name,Phone,Email")] Customer customer)
@@ -74,7 +72,9 @@ namespace Smart_retail_manager_website.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(customer);
+
+
+            return View("~/Views/Customers/Create.cshtml", customer);
         }
 
         // GET: Customer/Edit/5
@@ -90,12 +90,12 @@ namespace Smart_retail_manager_website.Controllers
             {
                 return NotFound();
             }
-            return View(customer);
+
+
+            return View("~/Views/Customers/Edit.cshtml", customer);
         }
 
         // POST: Customer/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("CustomerID,Name,Phone,Email")] Customer customer)
@@ -125,7 +125,9 @@ namespace Smart_retail_manager_website.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(customer);
+
+
+            return View("~/Views/Customers/Edit.cshtml", customer);
         }
 
         // GET: Customer/Delete/5
@@ -143,7 +145,8 @@ namespace Smart_retail_manager_website.Controllers
                 return NotFound();
             }
 
-            return View(customer);
+
+            return View("~/Views/Customers/Delete.cshtml", customer);
         }
 
         // POST: Customer/Delete/5

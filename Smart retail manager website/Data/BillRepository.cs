@@ -34,7 +34,7 @@ namespace Smart_retail_manager_website.Data
             // 2) Query the SQL view
             const string sql = @"
                 SELECT BillID, Cname, DateOfInvoice, LineTotal
-                FROM vw_Billummary;
+                FROM vw_BillSummary;
             ";
 
             using var conn = new SqlConnection(connString);

@@ -31,9 +31,10 @@ namespace Smart_retail_manager_website.Controllers
                 query = query.Where(b => b.Customer.Name.Contains(q));
             }
 
-            return View(await query.OrderByDescending(b => b.Date).ToListAsync());
+            // 🔴 View: /Views/Bills/Index.cshtml
+            return View("~/Views/Bills/Index.cshtml",
+                        await query.OrderByDescending(b => b.Date).ToListAsync());
         }
-
 
         // GET: Bill/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -51,19 +52,20 @@ namespace Smart_retail_manager_website.Controllers
                 return NotFound();
             }
 
-            return View(bill);
+            // 🔴 View: /Views/Bills/Details.cshtml
+            return View("~/Views/Bills/Details.cshtml", bill);
         }
 
         // GET: Bill/Create
         public IActionResult Create()
         {
             ViewData["CustomerID"] = new SelectList(_context.Customer, "CustomerID", "Name");
-            return View();
+
+            // 🔴 View: /Views/Bills/Create.cshtml
+            return View("~/Views/Bills/Create.cshtml");
         }
 
         // POST: Bill/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("BillID,Date,CustomerID,TaxRate")] Bill bill)
@@ -74,8 +76,11 @@ namespace Smart_retail_manager_website.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["CustomerID"] = new SelectList(_context.Customer, "CustomerID", "Name", bill.CustomerID);
-            return View(bill);
+
+            // 🔴 View: /Views/Bills/Create.cshtml
+            return View("~/Views/Bills/Create.cshtml", bill);
         }
 
         // GET: Bill/Edit/5
@@ -91,13 +96,14 @@ namespace Smart_retail_manager_website.Controllers
             {
                 return NotFound();
             }
+
             ViewData["CustomerID"] = new SelectList(_context.Customer, "CustomerID", "Name", bill.CustomerID);
-            return View(bill);
+
+            // 🔴 View: /Views/Bills/Edit.cshtml
+            return View("~/Views/Bills/Edit.cshtml", bill);
         }
 
         // POST: Bill/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("BillID,Date,CustomerID,TaxRate")] Bill bill)
@@ -127,8 +133,11 @@ namespace Smart_retail_manager_website.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["CustomerID"] = new SelectList(_context.Customer, "CustomerID", "Name", bill.CustomerID);
-            return View(bill);
+
+            // 🔴 View: /Views/Bills/Edit.cshtml
+            return View("~/Views/Bills/Edit.cshtml", bill);
         }
 
         // GET: Bill/Delete/5
@@ -147,7 +156,8 @@ namespace Smart_retail_manager_website.Controllers
                 return NotFound();
             }
 
-            return View(bill);
+            // 🔴 View: /Views/Bills/Delete.cshtml
+            return View("~/Views/Bills/Delete.cshtml", bill);
         }
 
         // POST: Bill/Delete/5
